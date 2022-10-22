@@ -4,7 +4,7 @@
 #### To build and run
 ```
 docker build --tag number-server .
-docker run -it -p 4000:4000 number-server
+docker run -it -p 4000:4000 --network host number-server
 ```
 
 ## Manually

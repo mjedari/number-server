@@ -1,9 +1,12 @@
-package main
+package reporter
 
 import (
 	"fmt"
+	"gitlab.com/mjedari/number-server/cache"
 	"time"
 )
+
+const ReportInterval = 10 * time.Second
 
 type Reporter struct {
 	Ticker           *time.Ticker
@@ -13,7 +16,7 @@ type Reporter struct {
 }
 
 func NewReporter() *Reporter {
-	ticker := time.NewTicker(ReporterInterval)
+	ticker := time.NewTicker(ReportInterval)
 	quit := make(chan struct{})
 	return &Reporter{Ticker: ticker, quit: quit}
 }
@@ -22,7 +25,7 @@ func (r *Reporter) Report() {
 	for {
 		select {
 		case <-r.Ticker.C:
-			fmt.Printf("Received %d unique number, %d duplicate. Unique total: %d\n", r.UniqueNumbers, r.DuplicateNumbers, len(numberCache))
+			fmt.Printf("Received %d unique number, %d duplicate. Unique total: %d\n", r.UniqueNumbers, r.DuplicateNumbers, len(cache.NumberCache))
 			r.resetNumbers()
 		case <-r.quit:
 			r.Ticker.Stop()

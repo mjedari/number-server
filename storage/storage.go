@@ -1,4 +1,4 @@
-package main
+package storage
 
 import (
 	"os"
@@ -6,7 +6,7 @@ import (
 )
 
 type Storage struct {
-	file *os.File
+	File *os.File
 }
 
 func NewStorage(name string) *Storage {
@@ -16,7 +16,7 @@ func NewStorage(name string) *Storage {
 		panic("error opening storage file")
 	}
 
-	return &Storage{file: file}
+	return &Storage{File: file}
 }
 
 func createOrOpenFile(fileName string) (*os.File, error) {
@@ -27,10 +27,10 @@ func createOrOpenFile(fileName string) (*os.File, error) {
 	return os.OpenFile(fileName, os.O_RDWR, 0644)
 }
 
-func (s *Storage) persistNumber(err error, buf []byte, w *sync.WaitGroup, m *sync.Mutex) {
+func (s *Storage) PersistNumber(err error, buf []byte, w *sync.WaitGroup, m *sync.Mutex) {
 	m.Lock()
 	{
-		if _, err = s.file.WriteString(string(buf) + "\n"); err != nil {
+		if _, err = s.File.WriteString(string(buf) + "\n"); err != nil {
 			panic(err)
 		}
 	}

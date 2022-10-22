@@ -3,19 +3,18 @@ package main
 import (
 	"errors"
 	"fmt"
+	"gitlab.com/mjedari/number-server/cache"
+	"gitlab.com/mjedari/number-server/reporter"
+	"gitlab.com/mjedari/number-server/storage"
 	"net"
 	"os"
 	"regexp"
 	"sync"
-	"time"
 )
 
 const (
-	MaxConnection    = 5
-	ReporterInterval = 10 * time.Second
+	MaxConnection = 5
 )
-
-var numberCache Cache
 
 var liveConnections = 0
 
@@ -31,15 +30,15 @@ func main() {
 	}
 	defer listener.Close()
 
-	reporter := NewReporter()
+	reporter := reporter.NewReporter()
 
 	fmt.Println("Server started listening ...")
-	numberCache = make(Cache, 2097152)
+	cache.NumberCache = make(cache.Cache, 2097152)
 
-	storage := NewStorage("numbers.log")
-	defer storage.file.Close()
+	storage := storage.NewStorage("numbers.log")
+	defer storage.File.Close()
 
-	if err = numberCache.syncCacheWithStorage(storage); err != nil {
+	if err = cache.NumberCache.SyncCacheWithStorage(storage); err != nil {
 		panic("can't sync cache with storage")
 	}
 
@@ -70,7 +69,7 @@ func main() {
 	}
 }
 
-func (c *Connection) handleRequest(storage *Storage, report *Reporter, w *sync.WaitGroup, m *sync.Mutex) {
+func (c *Connection) handleRequest(storage *storage.Storage, report *reporter.Reporter, w *sync.WaitGroup, m *sync.Mutex) {
 	m.Lock()
 	liveConnections += 1
 	m.Unlock()
@@ -89,7 +88,7 @@ func (c *Connection) handleRequest(storage *Storage, report *Reporter, w *sync.W
 		return
 	}
 
-	if err := numberCache.write(buf, w, m); err != nil {
+	if err := cache.NumberCache.Write(buf, w, m); err != nil {
 		// can't store number into the cache map
 		report.IncDuplicateNumber(1)
 		c.Node.Write([]byte(fmt.Sprintf("Number %v is duplicated.\n", string(buf))))
@@ -99,7 +98,7 @@ func (c *Connection) handleRequest(storage *Storage, report *Reporter, w *sync.W
 
 	report.IncUniqueNumber(1)
 
-	go storage.persistNumber(err, buf, w, m)
+	go storage.PersistNumber(err, buf, w, m)
 	c.Node.Write([]byte(fmt.Sprintf("Number %v has been stored.\n", string(buf))))
 
 	c.terminateHandler(w, m)

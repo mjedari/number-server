@@ -1,0 +1,9 @@
+server:
+  host: localhost
+  port: 4000
+
+connection:
+  max: 5
+
+storage:
+  path: "./numbers.log"

@@ -1,11 +1,15 @@
 package storage
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"sync"
 )
 
 type Storage struct {
+	mu sync.Mutex
+
 	File *os.File
 }
 
@@ -27,12 +31,14 @@ func createOrOpenFile(fileName string) (*os.File, error) {
 	return os.OpenFile(fileName, os.O_RDWR, 0644)
 }
 
-func (s *Storage) PersistNumber(err error, buf []byte, w *sync.WaitGroup, m *sync.Mutex) {
-	m.Lock()
+func (s *Storage) PersistNumber(buf []byte) error {
+	var status error
+	s.mu.Lock()
 	{
-		if _, err = s.File.WriteString(string(buf) + "\n"); err != nil {
-			panic(err)
+		if _, err := s.File.WriteString(fmt.Sprintln(string(buf))); err != nil {
+			status = errors.New("can not store number")
 		}
 	}
-	m.Unlock()
+	s.mu.Unlock()
+	return status
 }

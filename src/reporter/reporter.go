@@ -2,7 +2,7 @@ package reporter
 
 import (
 	"fmt"
-	"gitlab.com/mjedari/number-server/cache"
+	"gitlab.com/mjedari/number-server/src/cache"
 	"time"
 )
 
@@ -22,10 +22,11 @@ func NewReporter() *Reporter {
 }
 
 func (r *Reporter) Report() {
+	fmt.Println("Reporting service has just started...")
 	for {
 		select {
 		case <-r.Ticker.C:
-			fmt.Printf("Received %d unique number, %d duplicate. Unique total: %d\n", r.UniqueNumbers, r.DuplicateNumbers, len(cache.NumberCache))
+			fmt.Printf("Received %d unique number, %d duplicate. Unique total: %d\n", r.UniqueNumbers, r.DuplicateNumbers, len(cache.NumberCache.List))
 			r.resetNumbers()
 		case <-r.quit:
 			r.Ticker.Stop()

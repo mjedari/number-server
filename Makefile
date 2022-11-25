@@ -4,6 +4,5 @@ test:
 build:
 	go build -o number-server *.go && ./number-server
 
-
 build-by-docker:
 	docker build --tag number-server .

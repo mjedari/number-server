@@ -37,7 +37,7 @@ func main() {
 	reporter := reporter.NewReporter()
 
 	storage := storage.NewStorage(config.Storage.Path)
-	defer storage.File.Close()
+	defer storage.GetFile().Close()
 
 	if err = cache.SyncWithStorage(storage); err != nil {
 		panic("can't sync cache with storage")

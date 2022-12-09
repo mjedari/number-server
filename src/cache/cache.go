@@ -7,13 +7,19 @@ import (
 	"sync"
 )
 
+type ICache interface {
+	SyncWithStorage(storage storage.IStorage) error
+	Write(buf []byte) bool
+	GetList() map[string]bool
+}
+
 type Cache struct {
 	mu sync.Mutex
 
 	List map[string]bool
 }
 
-func NewCache() *Cache {
+func NewCache() ICache {
 	NumberCache = Cache{
 		mu:   sync.Mutex{},
 		List: map[string]bool{},
@@ -23,10 +29,10 @@ func NewCache() *Cache {
 
 var NumberCache Cache
 
-func (c *Cache) SyncWithStorage(storage *storage.Storage) error {
+func (c *Cache) SyncWithStorage(storage storage.IStorage) error {
 	// fetch all numbers
 	// cache all number into memory
-	scanner := bufio.NewScanner(storage.File)
+	scanner := bufio.NewScanner(storage.GetFile())
 
 	for scanner.Scan() {
 		NumberCache.List[scanner.Text()] = true
@@ -51,4 +57,8 @@ func (c *Cache) Write(buf []byte) bool {
 	}
 	c.mu.Unlock()
 	return status
+}
+
+func (c *Cache) GetList() map[string]bool {
+	return c.List
 }

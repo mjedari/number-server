@@ -13,16 +13,21 @@ import (
 	"sync/atomic"
 )
 
+type IHandler interface {
+	HandleRequest(cache cache.ICache, storage storage.IStorage, report reporter.IReporter, w *sync.WaitGroup)
+	ConnectionLimitExceeded(maxConnection int) bool
+}
+
 type Handler struct {
 	Conn net.Conn
 	Live uint32
 }
 
-func NewHandler(conn net.Conn) *Handler {
+func NewHandler(conn net.Conn) IHandler {
 	return &Handler{Conn: conn}
 }
 
-func (h *Handler) HandleRequest(cache *cache.Cache, storage *storage.Storage, report *reporter.Reporter, w *sync.WaitGroup) {
+func (h *Handler) HandleRequest(cache cache.ICache, storage storage.IStorage, report reporter.IReporter, w *sync.WaitGroup) {
 	atomic.AddUint32(&h.Live, 1)
 
 	buf := make([]byte, 9)

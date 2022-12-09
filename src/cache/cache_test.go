@@ -41,14 +41,14 @@ func TestCache_Write(t *testing.T) {
 	cache.Write(buf)
 
 	// assert
-	ok := cache.List[number]
+	ok := cache.GetList()[number]
 	if !ok {
 		logrus.Errorf("fail to store number %v", number)
 	}
 }
 
-func teardown(s *storage.Storage, t *testing.T) {
-	err := os.Remove(s.File.Name())
+func teardown(s storage.IStorage, t *testing.T) {
+	err := os.Remove(s.GetFile().Name())
 	if err != nil {
 		t.Error("failed to remove temp storage file")
 	}

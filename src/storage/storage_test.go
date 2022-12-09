@@ -34,8 +34,8 @@ func TestStorage_ConcurrentPersistNumber(t *testing.T) {
 	//
 }
 
-func teardown(s *Storage, t *testing.T) {
-	err := os.Remove(s.File.Name())
+func teardown(s IStorage, t *testing.T) {
+	err := os.Remove(s.GetFile().Name())
 	if err != nil {
 		t.Error("failed to remove temp storage file")
 	}

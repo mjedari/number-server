@@ -7,13 +7,18 @@ import (
 	"sync"
 )
 
+type IStorage interface {
+	PersistNumber(buf []byte) error
+	GetFile() *os.File
+}
+
 type Storage struct {
 	mu sync.Mutex
 
 	File *os.File
 }
 
-func NewStorage(name string) *Storage {
+func NewStorage(name string) IStorage {
 
 	file, err := createOrOpenFile(name)
 	if err != nil {
@@ -41,4 +46,8 @@ func (s *Storage) PersistNumber(buf []byte) error {
 	}
 	s.mu.Unlock()
 	return status
+}
+
+func (s *Storage) GetFile() *os.File {
+	return s.File
 }

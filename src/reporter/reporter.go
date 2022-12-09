@@ -8,6 +8,12 @@ import (
 
 const ReportInterval = 10 * time.Second
 
+type IReporter interface {
+	Report()
+	IncUniqueNumber(num uint)
+	IncDuplicateNumber(num uint)
+}
+
 type Reporter struct {
 	Ticker           *time.Ticker
 	quit             chan struct{}
